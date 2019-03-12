@@ -6,6 +6,7 @@ const express = require("express");
 const router = new express.Router();
 const Book = require("../models/book");
 
+// Responds with a list of all the books
 router.get("/", async function (req, res, next) {
   try {
     const books = await Book.findAll(req.query);
@@ -15,6 +16,7 @@ router.get("/", async function (req, res, next) {
   }
 });
 
+// Responds with a single book found by its isbn
 router.get("/:id", async function (req, res, next) {
   try {
     const book = await Book.findOne(req.params.id);
@@ -24,10 +26,11 @@ router.get("/:id", async function (req, res, next) {
   }
 });
 
+// Creates a book and responds with the newly created book
 router.post("/", async function (req, res, next) {
   const validatedResult = jsonschema.validate(req.body, bookSchema);
-  if (!validatedResult) {
-    let listOfErrors = result.errors.map(err => err.stack);
+  if (!validatedResult.valid) {
+    let listOfErrors = validatedResult.errors.map(err => err.stack);
     let err = new ExpressError(listOfErrors, 400);
     return next(err)
   } 
@@ -40,6 +43,7 @@ router.post("/", async function (req, res, next) {
   }
 });
 
+// Updates a book and responds with the updated book
 router.patch("/:isbn", async function (req, res, next) {
   try {
     const book = await Book.update(req.params.isbn, req.body);
@@ -49,6 +53,7 @@ router.patch("/:isbn", async function (req, res, next) {
   }
 });
 
+// Deletes a book and responds with a message of “Book deleted”
 router.delete("/:isbn", async function (req, res, next) {
   try {
     await Book.remove(req.params.isbn);
