@@ -28,11 +28,13 @@ router.get("/:id", async function (req, res, next) {
 
 // Creates a book and responds with the newly created book
 router.post("/", async function (req, res, next) {
-  const validatedResult = jsonschema.validate(req.body, bookSchema);
-  if (!validatedResult.valid) {
-    let listOfErrors = validatedResult.errors.map(err => err.stack);
+
+  const result = jsonschema.validate(req.body, bookSchema);
+  
+  if (!result.valid) {
+    let listOfErrors = result.errors.map(err => err.stack);
     let err = new ExpressError(listOfErrors, 400);
-    return next(err)
+    return next(err);
   } 
   try {
     const book = await Book.create(req.body);
@@ -45,6 +47,18 @@ router.post("/", async function (req, res, next) {
 
 // Updates a book and responds with the updated book
 router.patch("/:isbn", async function (req, res, next) {
+  const isbn = req.params.isbn;
+  const data = req.body;
+  let values = {isbn, ...data};
+  debugger
+  const result = jsonschema.validate(values, bookSchema);
+
+  if (!result.valid) {
+    let listOfErrors = result.errors.map(err => err.stack);
+    let err= new ExpressError(listOfErrors, 400);
+    return next(err);
+  }
+  
   try {
     const book = await Book.update(req.params.isbn, req.body);
     return res.json({ book });
